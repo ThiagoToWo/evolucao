@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: large;
+            text-align: center;
+        }
+        pre {
+            font-family: monospace;
+            font-size: xx-large;
+        }
+    </style>
+</head>
+<body>
+    <h1>Evolução</h1> 
+    <h2>Acaso</h2>
+    <p>
+        22 letras aleatórias serão sorteadas a cada 0,5s com a esperança de formar a frase "EU SOU O MAIS ADAPTADO".
+    </p>
+    <pre id="aleatorio"></pre>
+    <h2>Seleção Natural</h2>
+    <p>
+        A cada ciclo de 0,5s serão feitas 100 cópias da sequência de letras inicial (reprodução). A cada cópia feita existe
+        a chance de 0,5% de uma das letras ser substituída por outra letra diferente (mutação genética). Será selecionada das
+        100 cópias feitas a mais próxima da frase "EU SOU O MAIS ADAPTADO" (adaptação à natureza).
+        O ciclo é repetido fazendo o mesmo processo com essa nova frase selecionada.
+    </p>
+    <pre id="natural"></pre>
+    <button id="btIniciar">Iniciar</button>
+    <button id="btReset">Reset</button>
+    <h2>Deus</h2>
+    <p>
+        Escreva a frase "EU SOU O MAIS ADAPTADO" você mesmo.
+    </p>
+    <input type="text" placeholder="Escreva a frase" size="30">
+    
+    <script>
+        const saidaNatural = document.querySelector("#natural");
+        const saidaAleatorio = document.querySelector("#aleatorio");
+        const btIniciar = document.querySelector("#btIniciar");
+        const btReset = document.querySelector("#btReset");
+    
+        const probMutacao = 0.005; // Probabilidade de uma letra mudar durante uma cópia.
+        const numCopias = 100; // Quantidade de cópias feitas a cada processamento.
+        let maxAdaptacao = 0; // Guarda o valor da adaptação máxima (nº de letras na posição correta).
+        const caracteres = [" ", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+        let dnaInicial = []; // O DNA inicial que sofrerá seleção natural.
+        const dnaFinal = ["E", "U", " ", "S", "O", "U", " ", "O", " ", "M", "A", "I", "S", " ", "A", "D", "A", "P", "T", "A", "D", "O"];
+        const tamDNA = dnaFinal.length; // Tamanho do DNA.
+        const matrizDeCopias = []; // Matriz para guardar as cópias dos DNAs.
+        let intervalNatural; // Intervalo de repetição da seleção natural
+        let intervalAleatorio;// Intervalo de repetição da seleção aleatória
+        let copiasNatural = 0 // Quantidade de cópias feitas a cada ciclo de seleção natural.  
+        let copiasAleatorio = 0 // Quantidade de cópias feitas a cada ciclo de seleção aleatória.  
+    
+        // Preenche o DNA inicial com letras aleatórias.
+        for (let i = 0; i < tamDNA; i++) {
+            simbolo = Math.floor(Math.random() * caracteres.length);
+            dnaInicial[i] = caracteres[simbolo];
+        }
+    
+        saidaAleatorio.innerText = dnaInicial.join("") + "\n\n\n";
+        saidaNatural.innerText = dnaInicial.join("") + "\n\n\n";
+    
+        function selecionarNatural() {
+            // Faz cópias do DNA inicial
+            for (let i = 0; i < numCopias; i++) {
+                matrizDeCopias[i] = [];
+                for (let j = 0; j < tamDNA; j++) {
+                    if (Math.random() <= probMutacao) { // se ocorrer mutação em um determinado ponto...
+                        // ... uma letra aleatória é substutuida neste local na cópia.
+                        simbolo = Math.floor(Math.random() * caracteres.length);
+                        matrizDeCopias[i][j] = caracteres[simbolo];
+                    } else { //caso contrário...
+                        //... a cópia recebe a letra original daquela posição.
+                        matrizDeCopias[i][j] = dnaInicial[j];
+                    }
+                }
+            }
+    
+            // Verifica qual cópia é mais adaptada
+            for (let i = 0; i < numCopias; i++) {
+                let nivelDeAdaptacao = 0;
+                let j = 0;
+                // Conta quantas letras estão no lugar correto...
+                for (; j < tamDNA; j++) {
+                    //... em relação ao DNA final (adaptação ideal).
+                    if (matrizDeCopias[i][j] == dnaFinal[j]) {
+                        nivelDeAdaptacao += 1;
+                    }
+                }
+    
+                // Atualiza os mais adaptados com seus respectivos níveis.
+                if (nivelDeAdaptacao > maxAdaptacao) {
+                    maxAdaptacao = nivelDeAdaptacao;
+                    dnaInicial = matrizDeCopias[i];
+                }
+            }
+    
+            // Se o nível de adaptação ainda não alcançou o valor máximo...
+            if (maxAdaptacao < dnaFinal.length) {
+                copiasNatural += matrizDeCopias.length; // ... conte quantas cópias estão sendo feitas
+            } else {
+                clearInterval(intervalNatural);
+                console.log("fim natural")
+            }
+    
+            saidaNatural.innerText = dnaInicial.join("") + "\n\nAdaptação = " + maxAdaptacao + "/" + dnaFinal.length + " | cópias = " + copiasNatural;
+        }
+    
+        function selecionarAleatorio() {
+            const dnaInicial = [];
+    
+            // Preenche o DNA inicial com letras aleatórias.
+            for (let i = 0; i < tamDNA; i++) {
+                simbolo = Math.floor(Math.random() * caracteres.length);
+                dnaInicial[i] = caracteres[simbolo];
+            }
+    
+            let nivelDeAdaptacao = 0;
+            let i = 0;
+            // Conta quantas letras estão no lugar correto...
+            for (; i < tamDNA; i++) {
+                //... em relação ao DNA final (adaptação ideal).
+                if (dnaInicial[i] == dnaFinal[i]) {
+                    nivelDeAdaptacao += 1;
+                }
+            }
+    
+            // Conta as cópias aleatórias feitas até alcalçar a adaptação máxima
+            if (nivelDeAdaptacao < dnaFinal.length) {
+                copiasAleatorio += 1;
+            } else {
+                clearInterval(intervalAleatorio);
+                console.log("fim aleatório")
+            }
+    
+            saidaAleatorio.innerText = dnaInicial.join("") + "\n\nAdaptação = " + nivelDeAdaptacao + "/" + dnaFinal.length + " | cópias = " + copiasAleatorio;
+        }
+    
+        btIniciar.onclick = function () {
+            // Faz uma seleção natural a cada 100 milessegundos.
+            intervalNatural = setInterval(selecionarNatural, 500);
+            // Faz uma seleção natural a cada 100 milessegundos.
+            intervalAleatorio = setInterval(selecionarAleatorio, 500);
+            btIniciar.disabled = true;
+        }
+    
+        btReset.onclick = function () {
+            clearInterval(intervalAleatorio);
+            clearInterval(intervalNatural);
+            maxAdaptacao = 0;
+            copiasNatural = 0;
+            copiasAleatorio = 0;
+    
+            // Preenche o DNA inicial com letras aleatórias.
+            for (let i = 0; i < tamDNA; i++) {
+                simbolo = Math.floor(Math.random() * caracteres.length);
+                dnaInicial[i] = caracteres[simbolo];
+            }
+    
+            saidaAleatorio.innerText = dnaInicial.join("") + "\n\n\n";
+            saidaNatural.innerText = dnaInicial.join("") + "\n\n\n";
+            btIniciar.disabled = false;
+        }
+    </script>
+</body>
+</html>
